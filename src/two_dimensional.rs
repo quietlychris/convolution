@@ -7,8 +7,7 @@ use std::error::Error;
 use crate::ConvHyperParam;
 
 pub fn convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
-    let padding = 1;
-    let input = pad_2d(input, padding);
+    let input = pad_2d(input, hp.padding);
 
     let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
     let (i_n, i_m) = (input.nrows(), input.ncols());
