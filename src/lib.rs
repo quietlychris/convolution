@@ -4,6 +4,8 @@ pub mod sliding_2d;
 pub mod sliding_3d;
 
 pub mod mm_2d;
+pub mod mm_3d;
+
 pub mod utils;
 
 pub struct ConvHyperParam {
