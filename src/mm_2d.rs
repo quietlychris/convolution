@@ -24,10 +24,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
     let mut flat_kernel = Array2::zeros((1, flat_kernel_length));
     for kernel_row in 0..k_n {
         flat_kernel
-            .slice_mut(s![
-                0,
-                (k_m + stride_m) * kernel_row..(k_m + stride_m) * kernel_row + k_m
-            ])
+            .slice_mut(s![0, (k_m + stride_m) * kernel_row..(k_m + stride_m) * kernel_row + k_m])
             .assign(&hp.kernel.slice(s![kernel_row, 0..k_m]));
     }
     // println!("flat_kernel:\n{:#?}", flat_kernel);
@@ -46,14 +43,13 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
             weights
                 .slice_mut(s![
                     weight_row,
-                    (row * i_m * stride_m + (slide * stride_m))
-                        ..(row * i_m * stride_m + (slide * stride_m)) + flat_kernel_length
+                    (row * i_m * stride_m + (slide * stride_m))..(row * i_m * stride_m + (slide * stride_m)) + flat_kernel_length
                 ])
                 .assign(&flat_kernel.slice(s![0, 0..flat_kernel_length]));
             //
             // TO_DO: When not presented with a square value for strides, the convolution doesn't scale nicely
             // weights.slice_mut(s![weight_row, (row*i_m*stride_n + (slide*stride_m))..(row*i_m*stride_n + (slide*stride_m)) + flat_kernel_length]).assign(&flat_kernel.slice(s![0,0..flat_kernel_length]));
-            // weight_row +=1;
+            weight_row +=1;
         }
     }
 

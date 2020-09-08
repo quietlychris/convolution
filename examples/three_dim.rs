@@ -49,12 +49,7 @@ fn display_img(data: &Array3<f32>) {
     let (w, h) = (m, n);
     for y in 0..h {
         for x in 0..w {
-            let temp: [u8; 4] = [
-                data[[2, y, x]] as u8,
-                data[[1, y, x]] as u8,
-                data[[0, y, x]] as u8,
-                255u8,
-            ];
+            let temp: [u8; 4] = [data[[2, y, x]] as u8, data[[1, y, x]] as u8, data[[0, y, x]] as u8, 255u8];
             // println!("temp: {:?}", temp);
             buffer.push(u32::from_le_bytes(temp));
         }

@@ -10,8 +10,7 @@ pub fn pad_2d(input: Array2<f32>, padding: usize) -> Array2<f32> {
     let (n, m) = (input.nrows(), input.ncols());
 
     let mut out: Array2<f32> = Array2::zeros((n + (padding * 2), m + (padding * 2)));
-    out.slice_mut(s![padding..n + padding, padding..m + padding])
-        .assign(&input);
+    out.slice_mut(s![padding..n + padding, padding..m + padding]).assign(&input);
     out
 }
 

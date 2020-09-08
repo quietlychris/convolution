@@ -19,7 +19,7 @@ fn main() {
     let kernel = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
     // let kernel = array![[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]];
 
-    let hp = ConvHyperParam::default(kernel).stride((2, 2)).build();
+    let hp = ConvHyperParam::default(kernel).build();
     let input = open_grayimage_and_convert_to_ndarray2("examples/ferris_ml.png").unwrap();
     // display_img(input.clone());
 
