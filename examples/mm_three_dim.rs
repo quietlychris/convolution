@@ -4,7 +4,6 @@ use ndarray::prelude::*;
 use convolution::{mm_3d::*, utils::*, *};
 
 fn main() {
-
     let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
     display_img(&input);
 

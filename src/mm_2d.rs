@@ -1,11 +1,8 @@
 use ndarray::prelude::*;
-use ndarray_stats::QuantileExt;
 use std::iter::FromIterator;
 
-use image::*;
 use std::error::Error;
 
-use crate::sliding_2d::*;
 use crate::utils::*;
 use crate::ConvHyperParam;
 
@@ -19,7 +16,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
     let (w_n, w_m) = (o_m * o_n, (i_n * i_m) + stride_m);
     let mut weights = Array2::zeros((w_n, w_m));
 
-    let kernel_subunit_length = (k_m + stride_m); // Length needed to assign each row of the kernel to the flattened unit
+    let kernel_subunit_length = k_m + stride_m; // Length needed to assign each row of the kernel to the flattened unit
     let flat_kernel_length = kernel_subunit_length * k_n;
     let mut flat_kernel = Array2::zeros((1, flat_kernel_length));
     for kernel_row in 0..k_n {
@@ -49,7 +46,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
             //
             // TO_DO: When not presented with a square value for strides, the convolution doesn't scale nicely
             // weights.slice_mut(s![weight_row, (row*i_m*stride_n + (slide*stride_m))..(row*i_m*stride_n + (slide*stride_m)) + flat_kernel_length]).assign(&flat_kernel.slice(s![0,0..flat_kernel_length]));
-            weight_row +=1;
+            weight_row += 1;
         }
     }
 
@@ -59,7 +56,6 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
 
     Ok(weights.to_owned())
 }
-
 
 fn run_mm_convolution_2d(hp: &ConvHyperParam, input: &Array2<f32>, output: &mut Array2<f32>) {
     let flat_input = Array::from_iter(input.iter().cloned());

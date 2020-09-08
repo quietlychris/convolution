@@ -1,11 +1,8 @@
 use ndarray::prelude::*;
-use ndarray_stats::QuantileExt;
 use std::iter::FromIterator;
 
-use image::*;
 use std::error::Error;
 
-use crate::sliding_3d::*;
 use crate::utils::*;
 use crate::ConvHyperParam;
 
@@ -19,7 +16,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
     let (w_n, w_m) = (o_m * o_n, (i_n * i_m) + stride_m);
     let mut weights = Array2::zeros((w_n, w_m));
 
-    let kernel_subunit_length = (k_m + stride_m); // Length needed to assign each row of the kernel to the flattened unit
+    let kernel_subunit_length = k_m + stride_m; // Length needed to assign each row of the kernel to the flattened unit
     let flat_kernel_length = kernel_subunit_length * k_n;
     let mut flat_kernel = Array2::zeros((1, flat_kernel_length));
     for kernel_row in 0..k_n {
@@ -49,7 +46,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
             //
             // TO_DO: When not presented with a square value for strides, the convolution doesn't scale nicely
             // weights.slice_mut(s![weight_row, (row*i_m*stride_n + (slide*stride_m))..(row*i_m*stride_n + (slide*stride_m)) + flat_kernel_length]).assign(&flat_kernel.slice(s![0,0..flat_kernel_length]));
-            weight_row +=1;
+            weight_row += 1;
         }
     }
 
@@ -60,10 +57,8 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
     Ok(weights.to_owned())
 }
 
-
-fn run_mm_convolution_3d(hp: &ConvHyperParam, input: &Array3<f32>, output: &mut Array3<f32>) {
-    
-    let weights = kernel_to_weights_matrix(&hp, &input.slice(s![0,..,..]).to_owned() ).expect("Error creating the weights matrix");
+fn run_mm_convolution_3d(hp: &ConvHyperParam, input: &Array3<f32>, output: &mut Array3<f32>) -> Result<(), Box<dyn Error>> {
+    let weights = kernel_to_weights_matrix(&hp, &input.slice(s![0, .., ..]).to_owned()).expect("Error creating the weights matrix");
     // println!("weights:\n{:#?}", weights);
 
     let i_dims = input.dim();
@@ -82,6 +77,7 @@ fn run_mm_convolution_3d(hp: &ConvHyperParam, input: &Array3<f32>, output: &mut 
             }
         }
     }
+    Ok(())
 }
 
 pub fn mm_convolution_3d(input: Array3<f32>, hp: &ConvHyperParam) -> Result<Array3<f32>, Box<dyn Error>> {
@@ -98,8 +94,8 @@ pub fn mm_convolution_3d(input: Array3<f32>, hp: &ConvHyperParam) -> Result<Arra
     let o_n = ((i_n - k_n) as f32 / stride_n as f32).floor() as usize + 1;
     let o_m = ((i_m - k_m) as f32 / stride_m as f32).floor() as usize + 1;
 
-    let mut output: Array3<f32> = Array3::zeros((3,o_n, o_m));
-    run_mm_convolution_3d(&hp, &input, &mut output);
+    let mut output: Array3<f32> = Array3::zeros((3, o_n, o_m));
+    run_mm_convolution_3d(&hp, &input, &mut output)?;
 
     Ok(output)
 }

@@ -1,6 +1,4 @@
 use ndarray::prelude::*;
-
-use image::*;
 use std::error::Error;
 
 use crate::utils::*;

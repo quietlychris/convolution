@@ -1,5 +1,4 @@
 use ndarray::prelude::*;
-use ndarray_stats::QuantileExt;
 
 use image::*;
 use std::error::Error;

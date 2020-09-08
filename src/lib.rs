@@ -1,3 +1,4 @@
+#![allow(unused_variables)]
 use ndarray::prelude::*;
 
 pub mod sliding_2d;
