@@ -6,9 +6,9 @@ use std::error::Error;
 use crate::utils::*;
 use crate::ConvHyperParam;
 
-pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Result<Array2<f32>, Box<dyn Error>> {
+pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array3<f32>) -> Result<Array2<f32>, Box<dyn Error>> {
     let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
-    let (i_n, i_m) = (input.nrows(), input.ncols());
+    let (i_n, i_m) = (input.dim().1, input.dim().2);
     let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
     let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
     let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
@@ -20,11 +20,12 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
     let flat_kernel_length = kernel_subunit_length * k_n;
     let mut flat_kernel = Array2::zeros((1, flat_kernel_length));
     for kernel_row in 0..k_n {
+        let k_start = (k_m + stride_m) * kernel_row;
         flat_kernel
-            .slice_mut(s![0, (k_m + stride_m) * kernel_row..(k_m + stride_m) * kernel_row + k_m])
+            .slice_mut(s![0, k_start..k_start + k_m])
             .assign(&hp.kernel.slice(s![kernel_row, 0..k_m]));
     }
-    // println!("flat_kernel:\n{:#?}", flat_kernel);
+    println!("flat_kernel:\n{:#?}", flat_kernel);
 
     let mut weight_row = 0;
     for row in 0..o_n {
@@ -37,10 +38,11 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
             // weights.slice_mut(s![weight_row, (row*i_m + (slide*stride_m))..(row*i_m + (slide*stride_m)) + flat_kernel_length]).assign(&flat_kernel.slice(s![0,0..flat_kernel_length]));
             //
             // FULL VIEW FOR SQUARE STRIDES
+            let x_start = hp.padding + (row * i_m * stride_m) + (slide * stride_m);
             weights
                 .slice_mut(s![
                     weight_row,
-                    (row * i_m * stride_m + (slide * stride_m))..(row * i_m * stride_m + (slide * stride_m)) + flat_kernel_length
+                    x_start..x_start + flat_kernel_length
                 ])
                 .assign(&flat_kernel.slice(s![0, 0..flat_kernel_length]));
             //
@@ -58,19 +60,21 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
 }
 
 fn run_mm_convolution_3d(hp: &ConvHyperParam, input: &Array3<f32>, output: &mut Array3<f32>) -> Result<(), Box<dyn Error>> {
-    let weights = kernel_to_weights_matrix(&hp, &input.slice(s![0, .., ..]).to_owned()).expect("Error creating the weights matrix");
+    let weights = kernel_to_weights_matrix(&hp, &input).expect("Error creating the weights matrix");
+    println!("- Done building weight matrix");
     // println!("weights:\n{:#?}", weights);
 
+    let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
     let i_dims = input.dim();
     let (i_n, i_m) = (i_dims.1, i_dims.2);
-    let (k_n, k_m) = (hp.kernel.shape()[0], hp.kernel.shape()[1]);
+    let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
 
-    let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
-    let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
+    let o_n = ((i_n - k_n) as f32 / stride_n as f32).floor() as usize + 1;
+    let o_m = ((i_m - k_m) as f32 / stride_m as f32).floor() as usize + 1;
 
     for c in 0..3 {
         let flat_input = Array::from_iter(input.slice(s![c, .., ..]).iter().cloned());
-        let mm_output = weights.dot(&flat_input).into_shape((o_n, o_m)).unwrap();
+        let mm_output = weights.dot(&flat_input).into_shape((o_n, o_m))?;
         for y in 0..o_n {
             for x in 0..o_m {
                 output[[c, y, x]] = mm_output[[y, x]];

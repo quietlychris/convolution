@@ -26,14 +26,14 @@ fn main() {
     //let padded = pad_3d(input, padding);
     //println!("padded:\n{:#?}",padded);
     */
-    // let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
-    let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
+    let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
+    //let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
     display_img(&input);
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
+    let hp_hori = ConvHyperParam::default(kernel_h).stride((2,2)).build();
     let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
-    let hp_vert = ConvHyperParam::default(kernel_h).stride((3, 3)).build();
-    let hp_hori = ConvHyperParam::default(kernel_v);
+    let hp_vert = ConvHyperParam::default(kernel_v).stride((1,1)).build();
 
     let output = convolution_3d(input, &hp_hori).unwrap();
     let output = convolution_3d(output, &hp_vert).unwrap();
@@ -54,7 +54,6 @@ fn display_img(data: &Array3<f32>) {
             buffer.push(u32::from_le_bytes(temp));
         }
     }
-    //display_in_window(img_vec);
 
     let (window_width, window_height) = (n * 2, m * 2);
     let mut window = Window::new(

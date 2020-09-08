@@ -25,7 +25,7 @@ impl ConvHyperParam {
     }
 
     pub fn default(kernel: Array2<f32>) -> Self {
-        ConvHyperParam::new(0, (3, 3), kernel)
+        ConvHyperParam::new(kernel.nrows(), (kernel.nrows(), kernel.ncols()), kernel)
     }
 
     pub fn padding(mut self, padding: usize) -> Self {

@@ -4,15 +4,38 @@ use ndarray::prelude::*;
 use convolution::{mm_3d::*, utils::*, *};
 
 fn main() {
+
+      let input = array![
+        [
+            [1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0]
+        ],
+        [
+            [2.0, 2.0, 2.0],
+            [2.0, 2.0, 2.0],
+            [2.0, 2.0, 2.0]
+        ],
+        [
+            [3.0, 3.0, 3.0],
+            [3.0, 3.0, 3.0],
+            [3.0, 3.0, 3.0]
+        ]
+    ];
     let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
-    display_img(&input);
+    // display_img(&input);
 
-    let kernel = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
-    let hp = ConvHyperParam::default(kernel);
+    let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
+    let hp_hori = ConvHyperParam::default(kernel_h).stride((2,2)).build();
+    //let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
+    //let hp_vert = ConvHyperParam::default(kernel_v).stride((1,1)).build();
 
-    let output = mm_convolution_3d(input, &hp).unwrap();
+    let output = mm_convolution_3d(input, &hp_hori).unwrap();
+    //let output = mm_convolution_3d(output, &hp_vert).unwrap();
     display_img(&output);
+
 }
+
 
 fn display_img(data: &Array3<f32>) {
     // let dims = data.dim();
@@ -28,7 +51,6 @@ fn display_img(data: &Array3<f32>) {
             buffer.push(u32::from_le_bytes(temp));
         }
     }
-    //display_in_window(img_vec);
 
     let (window_width, window_height) = (n * 2, m * 2);
     let mut window = Window::new(
