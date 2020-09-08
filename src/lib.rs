@@ -1,7 +1,10 @@
 use ndarray::prelude::*;
 
-pub mod two_dimensional;
-pub mod three_dimensional;
+pub mod sliding_2d;
+pub mod sliding_3d;
+
+pub mod mm_2d;
+pub mod utils;
 
 pub struct ConvHyperParam {
     padding: usize,
@@ -19,7 +22,7 @@ impl ConvHyperParam {
     }
 
     pub fn default(kernel: Array2<f32>) -> Self {
-        ConvHyperParam::new(0, (1, 1), kernel)
+        ConvHyperParam::new(0, (2, 2), kernel)
     }
 
     pub fn padding(mut self, padding: usize) -> Self {
@@ -41,8 +44,7 @@ impl ConvHyperParam {
         ConvHyperParam {
             padding: self.padding,
             stride: self.stride,
-            kernel: self.kernel
+            kernel: self.kernel,
         }
     }
-
 }

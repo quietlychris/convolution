@@ -1,4 +1,7 @@
-use convolution::{sliding_2d::*, utils::*, *};
+use convolution::mm_2d::*;
+use convolution::sliding_2d::*;
+use convolution::utils::*;
+use convolution::*;
 use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 
@@ -11,24 +14,27 @@ fn main() {
         [1.0, 1.0, 1.0, 4.0, 0.0]
     ];
     */
-    // let kernel = array![[-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [1.0, -1.0, -1.0]];
+    // let input = array![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]];
 
-    let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
-    let hp_hori = ConvHyperParam::default(kernel_h).stride((2, 2)).build();
-    let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
-    let hp_vert = ConvHyperParam::default(kernel_v).stride((2, 2)).build();
+    let kernel = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
+    // let kernel = array![[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]];
+
+    let hp = ConvHyperParam::default(kernel).stride((2, 2)).build();
     let input = open_grayimage_and_convert_to_ndarray2("examples/ferris_ml.png").unwrap();
-    //let input = open_grayimage_and_convert_to_ndarray2("examples/grand_canyon_trees.png").unwrap();
-    display_img(input.clone());
+    // display_img(input.clone());
 
-    let output = convolution_2d(input, &hp_hori).unwrap();
-    let output = convolution_2d(output, &hp_vert).unwrap();
+    let sliding_output = convolution_2d(input.clone(), &hp).unwrap();
+    // println!("output from sliding convolution:\n{:#?}", sliding_output);
+
+    let output = mm_convolution_2d(input, &hp).unwrap();
     display_img(output.to_owned());
+
+    //println!("output:\n{:#?}",output);
 }
 
 pub fn display_img(input: Array2<f32>) {
     let (n, m) = (input.nrows(), input.ncols());
-    println!("input shape: ({}, {})", n, m);
+    println!("input shape (n x m): ({}, {})", n, m);
     let input = input.into_shape(n * m).expect("Error flattening input");
     let img_vec: Vec<u8> = input.to_vec().iter().map(|x| *x as u8).collect();
     // println!("img_vec: {:?}",img_vec);

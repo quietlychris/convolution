@@ -1,7 +1,7 @@
-use ndarray::prelude::*;
 use minifb::{Key, ScaleMode, Window, WindowOptions};
+use ndarray::prelude::*;
 
-use convolution::{*,three_dimensional::*};
+use convolution::{sliding_3d::*, utils::*, *};
 
 fn main() {
     /*let input = array![
@@ -26,26 +26,24 @@ fn main() {
     //let padded = pad_3d(input, padding);
     //println!("padded:\n{:#?}",padded);
     */
-
+    // let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
     let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
-    display_img(&input);    
+    display_img(&input);
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
     let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
-    let hp_vert = ConvHyperParam::default(kernel_h);
+    let hp_vert = ConvHyperParam::default(kernel_h).stride((3, 3)).build();
     let hp_hori = ConvHyperParam::default(kernel_v);
 
     let output = convolution_3d(input, &hp_hori).unwrap();
     let output = convolution_3d(output, &hp_vert).unwrap();
     display_img(&output);
-
-
 }
 
 fn display_img(data: &Array3<f32>) {
     // let dims = data.dim();
-    let (n,m) = (data.dim().1, data.dim().2);
-    println!("image is of size: ({},{})",n,m);
+    let (n, m) = (data.dim().1, data.dim().2);
+    println!("image is of size: ({},{})", n, m);
 
     let mut buffer: Vec<u32> = Vec::with_capacity(m * n);
     let (w, h) = (m, n);
@@ -63,7 +61,7 @@ fn display_img(data: &Array3<f32>) {
     }
     //display_in_window(img_vec);
 
-    let (window_width, window_height) = (n * 2, m *2);
+    let (window_width, window_height) = (n * 2, m * 2);
     let mut window = Window::new(
         "Test - ESC to exit",
         window_width,
@@ -83,31 +81,6 @@ fn display_img(data: &Array3<f32>) {
 
     while window.is_open() && !window.is_key_down(Key::Escape) && !window.is_key_down(Key::Q) {
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
-        window.update_with_buffer(&buffer, m,n).unwrap();
-    }
-}
-
-fn display_in_window(buffer: Vec<u32>) {
-    let (window_width, window_height) = (600, 600);
-    let mut window = Window::new(
-        "Test - ESC to exit",
-        window_width,
-        window_height,
-        WindowOptions {
-            resize: true,
-            scale_mode: ScaleMode::Center,
-            ..WindowOptions::default()
-        },
-    )
-    .unwrap_or_else(|e| {
-        panic!("{}", e);
-    });
-
-    // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-
-    while window.is_open() && !window.is_key_down(Key::Escape) && !window.is_key_down(Key::Q) {
-        // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
-        window.update_with_buffer(&buffer, 32, 32).unwrap();
+        window.update_with_buffer(&buffer, m, n).unwrap();
     }
 }
