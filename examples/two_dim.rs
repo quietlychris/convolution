@@ -1,4 +1,4 @@
-use convolution::{sliding_2d::*, utils::*, *};
+use convolution::prelude::*;
 use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 

@@ -1,7 +1,4 @@
-use convolution::mm_2d::*;
-use convolution::sliding_2d::*;
-use convolution::utils::*;
-use convolution::*;
+use convolution::prelude::*;
 use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 
@@ -23,7 +20,7 @@ fn main() {
     let input = open_grayimage_and_convert_to_ndarray2("examples/ferris_ml.png").unwrap();
     // display_img(input.clone());
 
-    let sliding_output = convolution_2d(input.clone(), &hp).unwrap();
+    let _sliding_output = convolution_2d(input.clone(), &hp).unwrap();
     // println!("output from sliding convolution:\n{:#?}", sliding_output);
 
     let output = mm_convolution_2d(input, &hp).unwrap();

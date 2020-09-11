@@ -34,28 +34,24 @@ pub fn open_grayimage_and_convert_to_ndarray2(path: &str) -> Result<Array2<f32>,
 
 // Expects a (3,n,m) dimensioned input
 pub fn pad_3d(input: Array3<f32>, padding: usize) -> Array3<f32> {
-
     match padding {
-        0 => {
-            input
-        },
+        0 => input,
         _ => {
             let dims = input.dim();
             println!("input dimensions are: {:?}", dims);
             let (n, m) = (dims.1, dims.2);
             println!("with an (n,m) of ({},{})", n, m);
-        
+
             let mut out: Array3<f32> = Array3::zeros((3, n + (padding * 2), m + (padding * 2)));
             // Can this be done in parallel using iterators + Rayon?
             for i in 0..3 {
                 out.slice_mut(s![i, padding..n + padding, padding..m + padding])
                     .assign(&input.slice(s![i, .., ..]));
             }
-        
+
             out
         }
     }
-
 }
 
 /// Helper function for transitioning between an `Image::RgbImage` input and an NdArray3<u8> structure

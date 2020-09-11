@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
-use ndarray::prelude::*;
+
+pub mod hyperparams;
 
 pub mod sliding_2d;
 pub mod sliding_3d;
@@ -9,45 +10,16 @@ pub mod mm_3d;
 
 pub mod utils;
 
-pub struct ConvHyperParam {
-    padding: usize,
-    stride: (usize, usize),
-    kernel: Array2<f32>,
-}
+mod tests;
 
-impl ConvHyperParam {
-    pub fn new(padding: usize, stride: (usize, usize), kernel: Array2<f32>) -> Self {
-        ConvHyperParam {
-            padding: padding,
-            stride: stride,
-            kernel: kernel,
-        }
-    }
+pub mod prelude {
 
-    pub fn default(kernel: Array2<f32>) -> Self {
-        ConvHyperParam::new(kernel.nrows(), (kernel.nrows(), kernel.ncols()), kernel)
-    }
+    pub use crate::sliding_2d::*;
+    pub use crate::sliding_3d::*;
 
-    pub fn padding(mut self, padding: usize) -> Self {
-        self.padding = padding;
-        self
-    }
+    pub use crate::mm_2d::*;
+    pub use crate::mm_3d::*;
 
-    pub fn stride(mut self, stride: (usize, usize)) -> Self {
-        self.stride = stride;
-        self
-    }
-
-    pub fn kernel(mut self, kernel: Array2<f32>) -> Self {
-        self.kernel = kernel;
-        self
-    }
-
-    pub fn build(self) -> ConvHyperParam {
-        ConvHyperParam {
-            padding: self.padding,
-            stride: self.stride,
-            kernel: self.kernel,
-        }
-    }
+    pub use crate::hyperparams::*;
+    pub use crate::utils::*;
 }

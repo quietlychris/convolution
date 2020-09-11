@@ -1,7 +1,7 @@
 use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 
-use convolution::{sliding_3d::*, utils::*, *};
+use convolution::prelude::*;
 
 fn main() {
     /*let input = array![
@@ -31,9 +31,9 @@ fn main() {
     display_img(&input);
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
-    let hp_hori = ConvHyperParam::default(kernel_h).stride((2,2)).build();
+    let hp_hori = ConvHyperParam::default(kernel_h).stride((2, 2)).build();
     let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
-    let hp_vert = ConvHyperParam::default(kernel_v).stride((1,1)).build();
+    let hp_vert = ConvHyperParam::default(kernel_v).stride((1, 1)).build();
 
     let output = convolution_3d(input, &hp_hori).unwrap();
     let output = convolution_3d(output, &hp_vert).unwrap();

@@ -1,10 +1,8 @@
+use crate::prelude::*;
 use ndarray::prelude::*;
 use std::iter::FromIterator;
 
 use std::error::Error;
-
-use crate::utils::*;
-use crate::ConvHyperParam;
 
 pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array3<f32>) -> Result<Array2<f32>, Box<dyn Error>> {
     let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
@@ -40,10 +38,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array3<f32>) -> Res
             // FULL VIEW FOR SQUARE STRIDES
             let x_start = hp.padding + (row * i_m * stride_m) + (slide * stride_m);
             weights
-                .slice_mut(s![
-                    weight_row,
-                    x_start..x_start + flat_kernel_length
-                ])
+                .slice_mut(s![weight_row, x_start..x_start + flat_kernel_length])
                 .assign(&flat_kernel.slice(s![0, 0..flat_kernel_length]));
             //
             // TO_DO: When not presented with a square value for strides, the convolution doesn't scale nicely

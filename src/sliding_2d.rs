@@ -1,8 +1,7 @@
 use ndarray::prelude::*;
 use std::error::Error;
 
-use crate::utils::*;
-use crate::ConvHyperParam;
+use crate::prelude::*;
 
 pub fn convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
     let input = pad_2d(input, hp.padding);

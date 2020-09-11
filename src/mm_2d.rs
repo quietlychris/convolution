@@ -3,8 +3,7 @@ use std::iter::FromIterator;
 
 use std::error::Error;
 
-use crate::utils::*;
-use crate::ConvHyperParam;
+use crate::prelude::*;
 
 pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Result<Array2<f32>, Box<dyn Error>> {
     let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
@@ -92,24 +91,4 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
     run_mm_convolution_2d(&hp, &input, &mut output);
 
     Ok(output)
-}
-
-#[test]
-fn small_mm_test() {
-    let input = array![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]];
-
-    let kernel = array![[1.0, 2.0], [3.0, 4.0]];
-    // let kernel = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
-    let hp = ConvHyperParam::default(kernel);
-
-    let sliding_output = convolution_2d(input.clone(), &hp).unwrap();
-    println!("output from sliding convolution:\n{:#?}", sliding_output);
-
-    let flat_input = Array::from_iter(input.iter().cloned());
-    let weights = kernel_to_weights_matrix(&hp, &input).expect("Error creating the weights matrix");
-    println!("weights:\n{:#?}", weights);
-
-    let mm_output = weights.dot(&flat_input).into_shape((2, 2)).unwrap();
-    println!("mm_output:\n{:#?}", mm_output);
-    assert!(sliding_output == mm_output);
 }
