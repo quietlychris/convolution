@@ -59,7 +59,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
 fn run_mm_convolution_2d(hp: &ConvHyperParam, input: &Array2<f32>, output: &mut Array2<f32>) {
     let flat_input = Array::from_iter(input.iter().cloned());
     let weights = kernel_to_weights_matrix(&hp, &input).expect("Error creating the weights matrix");
-    // println!("weights:\n{:#?}", weights);
+    println!("weights:\n{:#.2?}", weights);
 
     let (i_n, i_m) = (input.nrows(), input.ncols());
     let (k_n, k_m) = (hp.kernel.shape()[0], hp.kernel.shape()[1]);
