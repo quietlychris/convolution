@@ -1,5 +1,6 @@
 use ndarray::prelude::*;
 
+#[derive(Debug, Clone)]
 pub struct ConvHyperParam {
     pub padding: usize,
     pub stride: (usize, usize),

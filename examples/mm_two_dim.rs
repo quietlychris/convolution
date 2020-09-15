@@ -34,7 +34,7 @@ pub fn display_img(input: Array2<f32>) {
     println!("input shape (n x m): ({}, {})", n, m);
     let input = input.into_shape(n * m).expect("Error flattening input");
     let img_vec: Vec<u8> = input.to_vec().iter().map(|x| *x as u8).collect();
-    // println!("img_vec: {:?}",img_vec);
+    println!("img_vec: {:?}", img_vec);
     let mut buffer: Vec<u32> = Vec::with_capacity(input.len());
     for px in 0..input.len() {
         let temp: [u8; 4] = [img_vec[px], img_vec[px], img_vec[px], 255u8];
