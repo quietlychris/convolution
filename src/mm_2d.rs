@@ -5,6 +5,30 @@ use std::error::Error;
 
 use crate::prelude::*;
 
+/*
+#[test]
+pub fn new_mm_2d() {
+
+    let kernel = array![
+        [1.0, 2.0 ,3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, 9.0]
+    ];
+
+    let (i_n, i_m) = (input.nrows(), input.ncols());
+
+    let o_n = ((i_n - k_n) as f32 / stride_n as f32).floor() as usize + 1;
+    let o_m = ((i_m - k_m) as f32 / stride_n as f32).floor() as usize + 1;
+
+
+
+}
+*/
+
+
+
+
+
 pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Result<Array2<f32>, Box<dyn Error>> {
     let (stride_n, stride_m) = (hp.stride.0, hp.stride.1);
     let (i_n, i_m) = (input.nrows(), input.ncols());
@@ -45,7 +69,7 @@ pub fn kernel_to_weights_matrix(hp: &ConvHyperParam, input: &Array2<f32>) -> Res
         //for pass in 0..o_n {
         let start_x = if pass == 0 { 0 } else { 
             // I think most of the work needs to be done here
-            pass * o_n +  
+            (pass * pass) * 4    
         };
         let start_y = if pass == 0 {
             0
@@ -232,4 +256,119 @@ fn build_the_right_weights_matrix_i56_k33() {
     let diff = (sliding_output - mm_output).sum().abs();
     dbg!(diff);
     assert!(diff < eps);
+}
+
+#[test]
+#[serial]
+fn build_the_right_weights_matrix_i65_k33() {
+    #[rustfmt::skip]
+    let input = array![
+        [0.0, 0.1, 0.2, 0.3, 0.4],
+        [1.0, 1.1, 1.2, 1.3, 1.4], 
+        [2.0, 2.1, 2.2, 2.3, 2.4],
+        [3.0, 3.1, 3.2, 3.3, 3.4],
+        [4.0, 4.1, 4.2, 4.3, 4.4],
+        [5.0, 5.1, 5.2, 5.3, 5.4]
+    ];
+
+    /*
+    #[rustfmt::skip]
+    let kernel = array![
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, 9.0]
+    ];
+    */
+    #[rustfmt::skip]
+    let kernel = array![
+        [1.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0]
+    ];
+    let hp = ConvHyperParam::new(0, (1, 1), kernel);
+    //println!("convolution hyperparams:\n{:#?}",&hp);
+
+    // let weights = kernel_to_weights_matrix(&hp, &input).unwrap();
+
+    let eps = 1e-5;
+    let mm_output = mm_convolution_2d(input.clone(), &hp).unwrap();
+    let sliding_output = convolution_2d(input, &hp).unwrap();
+
+    println!("mm_output:\n{:#.1?}", mm_output);
+    println!("sliding_output:\n{:#.1?}", sliding_output);
+    let diff = (sliding_output - mm_output).sum().abs();
+    dbg!(diff);
+    assert!(diff < eps);
+}
+
+
+#[test]
+fn lets_find_some_fucking_nargles() {
+
+    #[rustfmt::skip]
+    let input = array![
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0, 9.0, 10.],
+        [11., 12., 13., 14., 15.],
+        [16., 16., 18., 19., 20.]
+    ];
+
+    let kernel = array![
+        [1.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0],
+        [-1., -1., -1.]
+    ];
+
+    let stride = 1;
+    let (i_n, i_m) = (input.nrows(), input.ncols());
+    let (k_n, k_m) = (kernel.nrows(), kernel.ncols());
+    let o_n = ((i_n - k_n) as f32 / stride as f32).floor() as usize + 1;
+    let o_m = ((i_m - k_m) as f32 / stride as f32).floor() as usize + 1;
+    println!("output size should be: {:?}", (o_n, o_m));
+
+    let flat_kernel_length = (i_m * k_n) - (i_m - k_n);
+    let mut flat_kernel = Array2::zeros((flat_kernel_length, 1));
+    for row in 0..k_n {
+        flat_kernel
+            .slice_mut(s![(row*i_m)..(row*i_m + k_n), 0])
+            .assign(&kernel.slice(s![row, 0..k_m]));
+    }
+    println!("flat_kernel:\n{:#?}", flat_kernel);
+
+    let meta_kernel_height = flat_kernel_length + (stride * o_n);
+    let mut meta_kernel = Array2::zeros((meta_kernel_height, o_m));
+    println!("blank meta_kernel:\n{:#.1?}", meta_kernel);
+
+    let mut start_x = 0;
+    for mk_col in 0..meta_kernel.ncols() {
+        println!("assigning on column {}, spots {}-{}",mk_col,start_x,start_x + flat_kernel_length);
+        meta_kernel
+            .slice_mut(s![start_x..start_x + flat_kernel_length, mk_col])
+            .assign(&flat_kernel.slice(s![0..flat_kernel_length, 0]));
+        start_x += stride;
+
+    }
+    println!("meta_kernel:\n{:#.1?}", meta_kernel);
+
+    let mut weights: Array2<f32> = Array2::zeros((20,6));
+
+    for mk in 0..o_n {
+        weights
+            .slice_mut(s![(mk * i_m)..(mk * i_m)+meta_kernel_height,(mk*k_m)..(mk*k_m) + o_m])
+            .assign(&meta_kernel.slice(s![0..meta_kernel_height, 0..o_m]))
+    }
+
+    println!("weights:\n{:#?}",weights);
+
+    use std::iter::FromIterator; 
+    let mut dot_input: Array2<f32> = Array2::zeros((1, i_n * i_m));
+    let mut counter = 0;
+    for x in input.iter() {
+        dot_input[[0,counter]] = *x;
+        counter +=1;
+    }
+
+    let output = dot_input.dot(&weights).into_shape((o_n, o_m)).unwrap();
+    println!("output\n{:#?}",output);
+
 }
