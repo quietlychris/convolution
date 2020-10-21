@@ -3,22 +3,13 @@ use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 
 fn main() {
-    /*
-    let input = array![
-        [1.0, 1.0, 1.0, 1.0, 0.0],
-        [1.0, 2.0, 1.0, 1.0, 0.0],
-        [1.0, 1.0, 3.0, 1.0, 0.0],
-        [1.0, 1.0, 1.0, 4.0, 0.0]
-    ];
-    */
-    // let kernel = array![[-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [1.0, -1.0, -1.0]];
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
-    let hp_hori = ConvHyperParam::default(kernel_h).stride((2, 2)).build();
+    let hp_hori = ConvHyperParam::default(kernel_h).stride((1, 1)).build();
     let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
-    let hp_vert = ConvHyperParam::default(kernel_v).stride((2, 2)).padding(3).build();
-    let input = open_grayimage_and_convert_to_ndarray2("examples/ferris_ml.png").unwrap();
-    //let input = open_grayimage_and_convert_to_ndarray2("examples/grand_canyon_trees.png").unwrap();
+    let hp_vert = ConvHyperParam::default(kernel_v).stride((1, 1)).padding(3).build();
+    // let input = open_grayimage_and_convert_to_ndarray2("examples/ferris_ml.png").unwrap();
+    let input = open_grayimage_and_convert_to_ndarray2("examples/grand_canyon_trees.png").unwrap();
     display_img(input.clone());
 
     let output = convolution_2d(input, &hp_hori).unwrap();

@@ -1,2 +1,6 @@
 /target
 Cargo.lock
+.gitignore
+examples/mm*.rs
+src/mm*.rs
+examples/smol*

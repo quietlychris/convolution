@@ -26,8 +26,8 @@ fn main() {
     //let padded = pad_3d(input, padding);
     //println!("padded:\n{:#?}",padded);
     */
-    let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
-    //let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
+    // let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
+    let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
     display_img(&input);
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
