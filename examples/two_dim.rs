@@ -3,7 +3,6 @@ use minifb::{Key, ScaleMode, Window, WindowOptions};
 use ndarray::prelude::*;
 
 fn main() {
-
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
     let hp_hori = ConvHyperParam::default(kernel_h).stride((1, 1)).build();
     let kernel_v = array![[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]];
