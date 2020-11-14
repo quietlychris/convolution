@@ -13,8 +13,8 @@ fn main() {
     let hp_vert = ConvHyperParam::default(kernel_v).stride((1, 1)).padding(3).build();
 
 
-    let output = convolution_2d(input, &hp_hori).unwrap();
-    let output = convolution_2d(output, &hp_vert).unwrap();
+    let output = mm_convolution_2d(input, &hp_hori).unwrap();
+    let output = mm_convolution_2d(output, &hp_vert).unwrap();
     display_img(output.to_owned());
 }
 
@@ -40,3 +40,4 @@ pub fn display_img(input: Array2<f32>) {
 
     show_image::stop().unwrap();
 }
+

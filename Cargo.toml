@@ -9,9 +9,8 @@ edition = "2018"
 [dependencies]
 image = "0.23"
 ndarray = "0.13"
-ndarray-stats = "0.3"
 ndarray-rand = "0.11"
 
-minifb = "0.18"
 
-serial_test = "0.4"
+[dev-dependencies]
+show-image = {version = "0.6", features = ["image"]}

@@ -8,7 +8,6 @@ use std::iter::FromIterator;
 
 #[test]
 #[serial]
-#[ignore]
 fn sliding_2d_k22s11p0() {
     #[rustfmt::skip]
     let input = array![
@@ -42,7 +41,6 @@ fn sliding_2d_k22s11p0() {
 
 #[test]
 #[serial]
-#[ignore]
 fn sliding_2d_k33s11p0() {
     #[rustfmt::skip]
     let input = array![
@@ -76,7 +74,6 @@ fn sliding_2d_k33s11p0() {
 
 #[test]
 #[serial]
-#[ignore]
 fn small_mm_2d_test() {
     /*
     #[rustfmt::skip]
