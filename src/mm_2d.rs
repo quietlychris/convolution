@@ -13,7 +13,18 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
     let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
     let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
 
-    let mut altered_input: Array2<f32> = Array2::zeros((k_n * k_m, o_m * o_n));
+    let altered_input = return_alternate_input(input, &hp, (o_n, o_m))?;
+    
+
+    let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
+    Ok(output)
+
+}
+
+fn return_alternate_input(input: Array2<f32>, hp: &ConvHyperParam, (o_n, o_m): (usize, usize)) -> Result<Array2<f32>, Box<dyn Error>> {
+    let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
+    
+    let mut alternate_input: Array2<f32> = Array2::zeros((k_n * k_m, o_m * o_n));
    
     for y in 0..o_n {
         for x in 0..o_m {
@@ -23,14 +34,11 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
                 .to_owned()
                 .into_shape((k_n * k_m, 1))?;
             // println!("temp with shape {:?}:\n{:#?}\n", temp.shape(), temp);
-            altered_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![..,0]));
+            alternate_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![..,0]));
         }
     }
-    
 
-    let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
-    Ok(output)
-
+    Ok(alternate_input)
 }
 
 pub fn return_flat_kernel_2d(hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {

@@ -14,7 +14,7 @@ pub fn pad_2d(input: Array2<f32>, padding: usize) -> Array2<f32> {
 }
 
 pub fn open_grayimage_and_convert_to_ndarray2(path: &str) -> Result<Array2<f32>, ImageError> {
-    let img = image::open(&path)?.to_luma();
+    let img = image::open(&path)?.to_luma8();
 
     let (w, h) = img.dimensions();
     let (w, h) = (w as usize, h as usize);

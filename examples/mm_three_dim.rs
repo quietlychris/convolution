@@ -5,7 +5,7 @@ use convolution::prelude::*;
 fn main() {
     
     //let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
-    let mut input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
+    let input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
 
     let kernel_h = array![[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]];
     let hp_hori = ConvHyperParam::default(kernel_h).stride((1,1)).padding(0).build();
