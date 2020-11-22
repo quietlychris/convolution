@@ -13,18 +13,17 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
     let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
     let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
 
-    let altered_input = return_alternate_input(input, &hp, (o_n, o_m))?;
+    let conv_input = return_conv_input(input, &hp, (o_n, o_m))?;
     
-
-    let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
+    let output = conv_input.dot(&flat_kernel).into_shape((o_n, o_m))?;
     Ok(output)
 
 }
 
-fn return_alternate_input(input: Array2<f32>, hp: &ConvHyperParam, (o_n, o_m): (usize, usize)) -> Result<Array2<f32>, Box<dyn Error>> {
+fn return_conv_input(input: Array2<f32>, hp: &ConvHyperParam, (o_n, o_m): (usize, usize)) -> Result<Array2<f32>, Box<dyn Error>> {
     let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
     
-    let mut alternate_input: Array2<f32> = Array2::zeros((k_n * k_m, o_m * o_n));
+    let mut conv_input: Array2<f32> = Array2::zeros((o_m * o_n, k_n * k_m));
    
     for y in 0..o_n {
         for x in 0..o_m {
@@ -34,16 +33,16 @@ fn return_alternate_input(input: Array2<f32>, hp: &ConvHyperParam, (o_n, o_m): (
                 .to_owned()
                 .into_shape((k_n * k_m, 1))?;
             // println!("temp with shape {:?}:\n{:#?}\n", temp.shape(), temp);
-            alternate_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![..,0]));
+            conv_input.slice_mut(s![(y * o_m) + x, 0..(k_n * k_m)]).assign(&temp.slice(s![..,0]));
         }
     }
 
-    Ok(alternate_input)
+    Ok(conv_input)
 }
 
 pub fn return_flat_kernel_2d(hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
     let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
-    let flat_kernel = hp.kernel.clone().into_shape((1, k_n * k_m))?;
+    let flat_kernel = hp.kernel.clone().into_shape((k_n * k_m, 1))?;
     Ok(flat_kernel)
 }
 
@@ -88,6 +87,6 @@ fn test_return_flat_kernel() {
     let flat_kernel = return_flat_kernel_2d(&hp).unwrap();
     println!("flat_kernel: {:#?}", flat_kernel);
 
-    let ideal = array![[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0]];
+    let ideal = array![[1.0], [1.0], [1.0], [0.0], [0.0], [0.0], [-1.0], [-1.0], [-1.0]];
     assert_eq!(ideal, flat_kernel);
 }
