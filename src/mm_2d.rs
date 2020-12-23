@@ -14,7 +14,7 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
     let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
 
     let mut altered_input: Array2<f32> = Array2::zeros((k_n * k_m, o_m * o_n));
-   
+
     for y in 0..o_n {
         for x in 0..o_m {
             let (i_y, i_x) = (y * hp.stride.0, x * hp.stride.1);
@@ -23,14 +23,12 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
                 .to_owned()
                 .into_shape((k_n * k_m, 1))?;
             // println!("temp with shape {:?}:\n{:#?}\n", temp.shape(), temp);
-            altered_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![..,0]));
+            altered_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![.., 0]));
         }
     }
-    
 
     let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
     Ok(output)
-
 }
 
 pub fn return_flat_kernel_2d(hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
@@ -51,7 +49,7 @@ fn test_mm_convolution_2d() {
 
     #[rustfmt::skip]
     let kernel = array![
-        [1.0, 1.0, 1.0], 
+        [1.0, 1.0, 1.0],
         [0.0, 0.0, 0.0], 
         [-1.0, -1.0, -1.0]
     ];
@@ -59,13 +57,12 @@ fn test_mm_convolution_2d() {
     let hp = ConvHyperParam::default(kernel).stride((1, 1)).padding(0).build();
 
     let mm_output = mm_convolution_2d(input.clone(), &hp).expect("Error occurred while running matrix-multiplied convolution");
-    println!("mm_output:\n{:#?}",mm_output);
+    println!("mm_output:\n{:#?}", mm_output);
     let sliding_output = convolution_2d(input, &hp).unwrap();
-    println!("sliding_output:\n{:#?}",sliding_output);
+    println!("sliding_output:\n{:#?}", sliding_output);
 
     assert_eq!(mm_output, sliding_output);
 }
-
 
 #[test]
 fn test_return_flat_kernel() {

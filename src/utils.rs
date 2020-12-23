@@ -34,13 +34,13 @@ pub fn open_grayimage_and_convert_to_ndarray2(path: &str) -> Result<Array2<f32>,
 pub fn bw_ndarray2_to_image(arr: Array2<f32>) -> RgbImage {
     assert!(arr.is_standard_layout());
 
-    println!("{:?}",arr.dim());
+    println!("{:?}", arr.dim());
     let (height, width) = arr.dim();
-    println!("producing an image of size: ({},{})",width, height);
+    println!("producing an image of size: ({},{})", width, height);
     let mut img: RgbImage = ImageBuffer::new(width as u32, height as u32);
     for y in 0..height {
         for x in 0..width {
-            let val = (arr[[y,x]] * 255.) as u8;
+            let val = (arr[[y, x]] * 255.) as u8;
             img.put_pixel(x as u32, y as u32, image::Rgb([val, val, val]));
         }
     }
@@ -92,16 +92,16 @@ pub fn open_rgb_image_and_convert_to_ndarray3(path: &str) -> Result<Array3<f32>,
 pub fn rgb_ndarray3_to_rgb_image(arr: Array3<f32>) -> RgbImage {
     assert!(arr.is_standard_layout());
 
-    println!("{:?}",arr.dim());
+    println!("{:?}", arr.dim());
     let (channel, height, width) = arr.dim();
-    println!("producing an image of size: ({},{})",width, height);
+    println!("producing an image of size: ({},{})", width, height);
     let mut img: RgbImage = ImageBuffer::new(width as u32, height as u32);
     for y in 0..height {
         for x in 0..width {
-            let r = (arr[[0,y,x]] * 255.) as u8;
-            let g = (arr[[1,y,x]] * 255.) as u8;
-            let b = (arr[[2,y,x]] * 255.) as u8;
-            img.put_pixel(x as u32, y as u32, image::Rgb([r,g,b]))
+            let r = (arr[[0, y, x]] * 255.) as u8;
+            let g = (arr[[1, y, x]] * 255.) as u8;
+            let b = (arr[[2, y, x]] * 255.) as u8;
+            img.put_pixel(x as u32, y as u32, image::Rgb([r, g, b]))
         }
     }
     img
