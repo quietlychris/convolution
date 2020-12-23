@@ -52,13 +52,7 @@ fn return_flat_kernel_3d(hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Err
 
     let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
     let flat_kernel_base = hp.kernel.clone().into_shape((1, k_n * k_m))?;
-    /*
-    let mut flat_kernel = Array2::zeros((1, k_n * k_m * 3));
-    for i in 0..3 {
-        let start = i * (k_n * k_m);
-        let end = start + (k_n * k_m);
-        flat_kernel.slice_mut(s![0, start..end]).assign(&flat_kernel_base.slice(s![..,0]));
-    }*/
+
     let mut flat_kernel = Array2::zeros((3, k_n * k_m));
     for i in 0..3 {
         flat_kernel.slice_mut(s![i, 0..(k_n * k_m)]).assign(&flat_kernel_base.slice(s![..,0]));
@@ -93,6 +87,51 @@ pub fn mm_convolution_3d(input: Array3<f32>, hp: &ConvHyperParam) -> Result<Arra
     Ok(output)
 
 }
+
+//----------------------------------
+
+pub fn single_mult_mm_convolution_3d(input: Array3<f32>, hp: &ConvHyperParam) -> Result<Array3<f32>, Box<dyn Error>> {
+
+    let input = pad_3d(input, hp.padding);
+
+    let (i_n, i_m) = (input.dim().1, input.dim().2);
+    println!("(i_n, i_m) = ({}, {}) = {} total elements",i_n, i_m, i_n * i_m);
+    let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
+
+    let flat_kernel = return_flat_kernel_2d(hp)?;
+    let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
+    let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
+    println!("(o_n, o_m) = ({}, {}) = {} total elements",o_n, o_m, o_n * o_m);
+
+    let channels = 3;
+
+    let mut altered_input: Array2<f32> = Array2::zeros((k_n * k_m, o_m * o_n * channels));
+    dbg!(altered_input.shape());
+   
+    let n = o_n * o_m;
+    for c in 0..channels {
+        for y in 0..o_n {
+            for x in 0..o_m {
+                let (i_y, i_x) = (y * hp.stride.0, x * hp.stride.1);
+                let temp = input
+                    .slice(s![c, i_y..(i_y + k_n), i_x..(i_x + k_m)])
+                    .to_owned()
+                      .into_shape((k_n * k_m, 1))?;
+                    altered_input.slice_mut(s![0..(k_n * k_m), c*n  + ((y * o_m) + x)]).assign(&temp.slice(s![..,0]));
+                }
+            }
+    }
+    
+    dbg!(altered_input.shape());
+    let output = flat_kernel.dot(&altered_input).into_shape((3, o_n, o_m))?;
+    println!("output.shape() = {:?}",output.shape()); 
+    
+    Ok(output)
+
+}
+
+
+
 
 #[test]
 fn small_mm_3d_convolution() {

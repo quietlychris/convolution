@@ -1,11 +1,39 @@
-**Work-in-progress library for doing arbitrary convolution of 2/3D ndarray structs**
+### Work-in-progress library for composable convolution primitives of 2/3D ndarray structs**
+*No, really, this library is pretty unstable*
 
 The following is an example of an RGB image converted to `Array3<f32>` and 
-run through a horizontal and vertical line filter using a sliding-window kernel.
-Dimensionality is reduced depending on the defined padding and stride values.   
+run through an edge-detection kernel filter through a matrix-multiplication convolution.
+
+Several different methods are available, including only-2D convolution, repeated 2D convolution,
+and single matrix-multiplication operation for 3D images. Arbitrary kernels can be used for any 
+of these operations. 
+
+
+
+```rust
+use convolution::prelude::*;
+use ndarray::prelude::*;
+
+fn main() {
+    let mut input = open_rgb_image_and_convert_to_ndarray3("examples/grand_canyon_trees.png").unwrap();
+
+    // https://en.wikipedia.org/wiki/Kernel_(image_processing)#Details Look under "Edge Detection"
+    #[rustfmt::skip]
+    let kernel_edge = array![
+        [-1.0, -1.0, -1.0],
+        [-1.0, 8.0, -1.0],
+        [-1.0, -1.0, -1.0]
+    ];
+    let hp_edge = ConvHyperParam::default(kernel_edge).stride((1,1)).padding(0).build();
+    let output = mm_convolution_3d(input, &hp_edge).unwrap(); // or single_mult_mm_convolution_3d()
+    
+    display_image(output); // Do this however you want, the show_image library is pretty nice
+}
+```
+
 
 **before:**
-<p align="left"><img src="/examples/grand_canyon_trees.png" width="400" height="300" /></p>
+<p align="left"><img src="/examples/grand_canyon_trees.png" width="500" height="400" /></p>
 
 **after:**
-<p align="left"><img src="/examples/filtered_canyon.png" width="400" height="300" /></p>
+<p align="left"><img src="/examples/filtered_canyon.png" width="500" height="400" /></p>

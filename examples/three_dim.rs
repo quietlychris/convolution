@@ -1,6 +1,6 @@
-use show_image::{make_window_full, Event, WindowOptions};
-use ndarray::prelude::*;
 use convolution::prelude::*;
+use ndarray::prelude::*;
+use show_image::{make_window_full, Event, WindowOptions};
 
 fn main() {
     // let input = open_rgb_image_and_convert_to_ndarray3("examples/ferris_ml.png").unwrap();
@@ -34,5 +34,4 @@ fn main() {
     }
 
     show_image::stop().unwrap();
-
 }
