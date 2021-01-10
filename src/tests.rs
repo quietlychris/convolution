@@ -7,6 +7,24 @@ use ndarray_rand::RandomExt;
 use std::iter::FromIterator;
 
 #[test]
+fn check_return_conv_input_2d_shapes() {
+
+    let input = Array::random((28, 28), Uniform::new(0., 1.));
+
+    for padding in {0..3} {
+        let hp = ConvHyperParam::new(padding,(1,1), Array::random((3, 3), Uniform::new(0.0, 0.5)) );
+        let output = return_conv_input(&input, &hp).unwrap();
+        match padding {
+            0 => assert_eq!(output.shape(), &[9,676]),
+            1 => assert_eq!(output.shape(), &[9,784]),
+            2 => assert_eq!(output.shape(), &[9,900]),
+            _ => panic!("unexpected padding value")
+        }
+        
+    }
+}
+
+#[test]
 #[serial]
 fn sliding_2d_k22s11p0() {
     #[rustfmt::skip]

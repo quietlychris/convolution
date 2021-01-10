@@ -1,4 +1,7 @@
 #![allow(unused_variables)]
+#[macro_use]
+extern crate serial_test;
+
 pub mod hyperparams;
 
 pub mod sliding_2d;

@@ -5,11 +5,26 @@ use crate::prelude::*;
 
 pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
     let input = pad_2d(input, hp.padding);
-
-    let (i_n, i_m) = (input.nrows(), input.ncols());
+    
     let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
+    let (i_n, i_m) = (input.nrows(), input.ncols());
+    let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
+    let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
+
+    let mut altered_input: Array2<f32> = return_conv_input(&input, hp)?;
 
     let flat_kernel = return_flat_kernel_2d(hp)?;
+
+    let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
+    Ok(output)
+}
+
+pub fn return_conv_input(input: &Array2<f32>, hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
+    
+    let input = pad_2d(input.clone(), hp.padding);
+
+    let (k_n, k_m) = (hp.kernel.nrows(), hp.kernel.ncols());
+    let (i_n, i_m) = (input.nrows(), input.ncols());
     let o_n = ((i_n - k_n) as f32 / hp.stride.0 as f32).floor() as usize + 1;
     let o_m = ((i_m - k_m) as f32 / hp.stride.1 as f32).floor() as usize + 1;
 
@@ -26,9 +41,7 @@ pub fn mm_convolution_2d(input: Array2<f32>, hp: &ConvHyperParam) -> Result<Arra
             altered_input.slice_mut(s![0..(k_n * k_m), (y * o_m) + x]).assign(&temp.slice(s![.., 0]));
         }
     }
-
-    let output = flat_kernel.dot(&altered_input).into_shape((o_n, o_m))?;
-    Ok(output)
+    Ok(altered_input)
 }
 
 pub fn return_flat_kernel_2d(hp: &ConvHyperParam) -> Result<Array2<f32>, Box<dyn Error>> {
