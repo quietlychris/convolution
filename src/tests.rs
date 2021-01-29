@@ -7,13 +7,13 @@ use ndarray_rand::RandomExt;
 use std::iter::FromIterator;
 
 #[test]
-fn check_return_conv_input_2d_shapes() {
+fn check_return_conv_input_2d_2d_shapes() {
 
     let input = Array::random((28, 28), Uniform::new(0., 1.));
 
     for padding in {0..3} {
         let hp = ConvHyperParam::new(padding,(1,1), Array::random((3, 3), Uniform::new(0.0, 0.5)) );
-        let output = return_conv_input(&input, &hp).unwrap();
+        let output = return_conv_input_2d(&input, &hp).unwrap();
         match padding {
             0 => assert_eq!(output.shape(), &[9,676]),
             1 => assert_eq!(output.shape(), &[9,784]),
@@ -23,6 +23,19 @@ fn check_return_conv_input_2d_shapes() {
         
     }
 }
+
+#[test]
+#[should_panic]
+fn check_1d_convolution() {
+
+    // This should panic because the height of the array is less than that of the kernel
+    let input = Array::random((1,784), Uniform::new(0., 1.));
+    let hp = ConvHyperParam::new(0, (1,1), Array::random((3, 3), Uniform::new(0.0, 0.5)) );
+    let output = return_conv_input_2d(&input, &hp).unwrap();
+ 
+
+}
+
 
 #[test]
 #[serial]
