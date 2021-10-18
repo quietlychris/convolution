@@ -1,4 +1,4 @@
-### Work-in-progress library for composable convolution primitives of 2/3D ndarray structs**
+## Work-in-progress library for composable convolution primitives of 2/3D ndarray structs**
 *No, really, this library is pretty unstable*
 
 The following is an example of an RGB image converted to `Array3<f32>` and 
@@ -7,8 +7,6 @@ run through an edge-detection kernel filter through a matrix-multiplication conv
 Several different methods are available, including only-2D convolution, repeated 2D convolution,
 and single matrix-multiplication operation for 3D images. Arbitrary kernels can be used for any 
 of these operations. 
-
-
 
 ```rust
 use convolution::prelude::*;
@@ -31,9 +29,18 @@ fn main() {
 }
 ```
 
-
 **before:**
 <p align="left"><img src="/examples/grand_canyon_trees.png" width="500" height="400" /></p>
 
 **after:**
+<p align="left"><img src="/examples/filtered_canyon.png" width="500" height="400" /></p>
+
+### License
+
+This work is licensed under the MIT License, a permissive open source license. 
+
+However, if you are intending to use this library for machine learning, please educate yourself 
+on the potential downstream effects of your work, and review some of the guidelines and 
+discussions surrounding it. Some resources that have been collected by the Institute for Ethical 
+Machine Learning [here](https://github.com/EthicalML/awesome-artificial-intelligence-guidelines).
 <p align="left"><img src="/examples/filtered_canyon.png" width="500" height="400" /></p>
