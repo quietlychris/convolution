@@ -43,4 +43,3 @@ However, if you are intending to use this library for machine learning, please e
 on the potential downstream effects of your work, and review some of the guidelines and 
 discussions surrounding it. Some resources that have been collected by the Institute for Ethical 
 Machine Learning [here](https://github.com/EthicalML/awesome-artificial-intelligence-guidelines).
-<p align="left"><img src="/examples/filtered_canyon.png" width="500" height="400" /></p>
